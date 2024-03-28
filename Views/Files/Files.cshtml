@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "Files";
+}
+
+
+<div id="Upload" style="display:block;">
+    <h2>Files</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-2" style="padding-bottom:20px">
+            <label class="form-label">Select an Excel File  :</label>
+        </div>
+        <div class="col-md-4">
+            <input class="form-control" type="file" name="importFile" id="importFile" />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <button class="btn btn-primary" id="btnUpload" type="button">Upload</button>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-primary" id="btnCancel" type="button" onclick="Clear()" >Cancel</button>
+        </div>
+    </div>
+</div>
+<div id="MyList" style="display:none;">
+
+</div>
+
+
+@section scripts{
+    <script>
+
+        $(document).on("click", "#btnUpload", function () {
+            var files = $("#importFile").get(0).files;
+
+            var formData = new FormData();
+            formData.append('importFile', files[0]);
+
+            $.ajax({
+                url: '/Files/FileHandler',
+                data: formData,
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.indexOf("<div class='toast") !== -1) {
+                        $('.toast-container').append(data);
+                        var toaster = toast[0];
+                        var toasty = new bootstrap.Toast(toaster);
+                        toasty.show();
+                    } else {
+                        showToast("Data Stored Successfully", 'success');
+                        $('#MyList').html(data);
+                        $('#Upload').hide();
+                        $('#MyList').show();
+                    }
+                },
+                error: function () {
+                    showToast('Failed To Import', 'warning')
+                }
+            });
+        });
+
+        function List() {
+            $.ajax({
+                url: '/Files/List',
+                type: 'GET',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    $('#MyList').html(data);
+                    $('#Upload').hide();
+                    $('#MyList').show();
+                },
+                error: function () {
+                    showToast('Failed to Import', 'warning')
+                }
+            })
+        }
+
+        function Clear() {
+            $('#importFile').val('');
+        }
+
+        function deleteSelected() {
+            var selectedEmployees = $('.selectCustomer:checked');
+            if (selectedEmployees.length > 0) {
+                var ids = selectedEmployees.map(function () {
+                    return $(this).val();
+                }).get();
+                if (confirm('Are you sure you want to delete the selected employees?')) {
+                    var idString = ids.join(',');
+                    $.ajax({
+                        url: '@Url.Action("DeleteCustomers", "Files")',
+                        type: 'POST',
+                        data: { ids: idString },
+                        success: function (response) {
+                            showToast('Deleted successfully.', 'warning');
+                            List();
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            } else {
+                alert('Please select at least one employee to delete.');
+            }
+        }
+
+        function showToast(message, type) {
+            var toast =
+                $(
+                    '<div class="toast align-items-center text-white bg-' + type + ' border-0" role="alert" aria-live="assertive" aria-atomic="true">\
+                       <div class="d-flex">\
+                         <div class="toast-body">\
+                           ' + message + '\
+                         </div>\
+                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>\
+                       </div>\
+                     </div>'
+                );
+
+            
+
+
+            $('.toast-container').append(toast);
+            var toastElement = toast[0];
+            var toastInstance = new bootstrap.Toast(toastElement);
+            toastInstance.show();
+        }
+    </script>
+}
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+
+</div>

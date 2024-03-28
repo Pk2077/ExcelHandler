@@ -1,0 +1,51 @@
+﻿@model List<FileHandler.Models.Customer>
+
+<h2>Customers</h2>
+
+<div class="">
+    <table id="employees" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th class="myth">
+                    <input type="checkbox" onclick="" id="HeaderChkBox"> Select
+                </th>
+                <th class="myth">Id</th>
+                <th class="myth">Name</th>
+                <th class="myth">Code</th>
+                <th class="myth">Address 1</th>
+                <th class="myth">Address 2</th>
+                <th class="myth">City</th>
+                <th class="myth">State</th>
+                <th class="myth">Pin</th>
+                <th class="myth">Mobile No</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var customer in Model)
+            {
+                <tr class="employee-row" data-id="@customer.Id">
+                    <td><input type="checkbox" class="selectCustomer" value="@customer.Id"></td>
+                    <td>@customer.Id</td>
+                    <td>@customer.CustomerName</td>
+                    <td>@customer.CustomerCode</td>
+                    <td>@customer.Address1</td>
+                    <td>@customer.Address2</td>
+                    <td>@customer.City</td>
+                    <td>@customer.State</td>
+                    <td>@customer.Pin</td>
+                    <td>@customer.MobileNo</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    <div class="row mb-4">
+        <div class="col-md-2">
+            @Html.ActionLink("Back To Upload", "Index", "Files", null, new { @class = "btn btn-outline-primary" })
+        </div>
+        <div class="col-md-2">
+            <button id="Delete" class="btn btn-outline-danger" onclick="deleteSelected()">Delete</button>
+        </div>
+    </div>
+</div>
