@@ -6,9 +6,31 @@
     <title>@ViewBag.Title - File Handler</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body>
-    <div class=" body-content">
+    <div class="navbar">
+        <p id="title" class="navbar-brand">Excel Handler</p>
+        <div class="right-buttons">
+            <button id="UploadBtn_Lay" >
+                <i class="fa-sharp fa-solid fa-upload"></i>
+                Upload
+            </button>
+            <button id="Delete_Lay"  onclick="deleteSelected()" style="display:none;">
+                <i class="fa-sharp fa-solid fa-trash"></i>
+                Delete
+            </button>
+            <button id="btnUpload"  style="display:none;">
+                <i class="fa-sharp fa-solid fa-upload"></i>
+                Upload
+            </button>
+            <button  id="btnCancel_Lay" type="button" onclick="Clear()" style="display:none;">
+                <i class="fa-sharp fa-solid fa-rectangle-xmark"></i>
+                Cancel
+            </button>
+        </div>
+    </div>
+    <div class="container body-content">
         @RenderBody()
     </div>
 
@@ -17,3 +39,4 @@
     @RenderSection("scripts", required: false)
 </body>
 </html>
+

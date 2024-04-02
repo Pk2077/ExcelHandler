@@ -35,8 +35,9 @@ h2, .h2 {
             color: #fff;
         }
 
-    .navbar-inverse .navbar-brand {
+     .navbar-brand {
         color: #fff;
+        padding-bottom: 0px!important;
     }
 
         .navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
@@ -153,3 +154,92 @@ table a:not(.btn), .table a:not(.btn) {
     --bs-btn-disabled-border-color: #0179b6 !important;
     --bs-gradient: none;
 }
+
+
+
+
+
+.navbar {
+    background-color: var(--parent-color);
+    overflow: hidden;
+}
+
+    .navbar a {
+        float: left;
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 20px;
+        text-decoration: none;
+    }
+
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+    /* CSS for the buttons on the right */
+    .navbar .right-buttons {
+        float: right;
+    }
+
+:root {
+    --parent-color: #0179b6;
+}
+
+.navbar button {
+    background-color: var(--parent-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 14px 20px;
+    margin-right: 5px;
+    border-radius: 5px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+}
+
+.right-buttons {
+    display: flex;
+    align-items: center;
+}
+
+#title {
+    padding-top:10px;
+    color:white;
+    margin-left: 20px; 
+    flex: 0; 
+    cursor:pointer
+}
+.form-label{
+    font-weight:bold;
+    padding-top:5px;
+}
+.upload-icon {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background-color: #0179b6;
+    color:white;
+}
+
+    .upload-icon i {
+        margin-right: 5px;
+    }
+
+/* Style the input to be hidden but the label to look like a button */
+input[type="file"] {
+    display: none;
+}
+
+.navbar {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+

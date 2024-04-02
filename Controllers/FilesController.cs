@@ -33,15 +33,9 @@ namespace FileHandler.Controllers
             var rows = Duplicaterows(dt);
             if(rows.Count > 0)
             {
-                return Content(@"<div class='toast align-items-center text-white bg-warning border-0 fade show' role='alert' aria-live='assertive' aria-atomic='true'>
-                                      <div class='d-flex'>
-                                         <div class='toast-body'>
-                                         Please Check For Duplicate Records    
-                                         </div>
-                                         <button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast' aria-label='Close'>
-                                         </button>
-                                      </div>
-                                 </div>", "text/html");
+                string duplicateRowsMessage = string.Join("<br>", rows.Select(r => r.ToString()));
+                return Content($"<div class='toast align-items-center text-white bg-warning border-0 fade show' role='alert' aria-live='assertive' aria-atomic='true'><div class='d-flex'><div class='toast-body'>Please Check For Duplicate Records:<br/>{duplicateRowsMessage}</div><button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast' aria-label='Close'></button></div></div>", "text/html");
+
             }
             else
             {
@@ -81,7 +75,7 @@ namespace FileHandler.Controllers
             using (ExcelPackage package = new ExcelPackage(new FileInfo(filePath)))
             {
                 ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                int rowCount = worksheet.Dimension.Rows;
+                int rowCount = worksheet.Dimension.End.Row;
                 int colCount = worksheet.Dimension.Columns;
 
                 int startRow = 1;
