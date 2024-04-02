@@ -16,28 +16,48 @@ namespace FileHandler.Extensions
 
         public static void InsertCustomers(DataRow row)
         {
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            if (row != null)
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.CommandText = "InsertCustomers";
 
-                        command.Parameters.AddWithValue("@CustomerName", row["Customer Name"]);
-                        command.Parameters.AddWithValue("@CustomerCode", row["Customer Code"]);
-                        command.Parameters.AddWithValue("@Address1", row["Add1"]);
-                        command.Parameters.AddWithValue("@Address2", row["Add2"]);
-                        command.Parameters.AddWithValue("@City", row["City"]);
-                        command.Parameters.AddWithValue("@State", row["State Code"]);
-                        command.Parameters.AddWithValue("@Pin", row["Pin"]);
-                        command.Parameters.AddWithValue("@MobileNo", row["Mobile No"]);
+                        bool allParametersAdded = true;
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@CustomerName", row["Customer Name"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@CustomerCode", row["Customer Code"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@Address1", row["Add1"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@Address2", row["Add2"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@City", row["City"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@State", row["State Code"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@Pin", row["Pin"]);
+                        allParametersAdded &= AddParameterIfNotEmpty(command, "@MobileNo", row["Mobile No"]);
 
-                        command.ExecuteNonQuery();
+                        if (allParametersAdded)
+                        {
+                            command.ExecuteNonQuery();
+                        }
                     }
+                }
             }
         }
+        private static bool AddParameterIfNotEmpty(SqlCommand command, string parameterName, object value)
+        {
+            if (value != null && value != DBNull.Value && !string.IsNullOrWhiteSpace(value.ToString()))
+            {
+                command.Parameters.AddWithValue(parameterName, value);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
 
         public static List<Customer> GetCustomers()
         {

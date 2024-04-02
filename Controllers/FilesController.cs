@@ -8,6 +8,7 @@ using FileHandler.Models;
 using System.Collections.Generic;
 using System.Net.Http;
 using System;
+using System.Linq;
 
 namespace FileHandler.Controllers
 {
@@ -28,7 +29,7 @@ namespace FileHandler.Controllers
         [HttpPost]
         public ActionResult FileHandler(HttpPostedFileBase importFile)
         {
-            var dt = ToDataTable(importFile);
+            var dt = ToDataTableDynamic(importFile);
             var rows = Duplicaterows(dt);
             if(rows.Count > 0)
             {
@@ -67,8 +68,7 @@ namespace FileHandler.Controllers
             }
         }
 
-
-        private DataTable ToDataTable(HttpPostedFileBase importFile)
+        private DataTable ToDataTableDynamic(HttpPostedFileBase importFile)
         {
             string fileName = Path.GetFileName(importFile.FileName);
             string filePath = Path.Combine(Server.MapPath("~/Files"), fileName);
@@ -84,19 +84,57 @@ namespace FileHandler.Controllers
                 int rowCount = worksheet.Dimension.Rows;
                 int colCount = worksheet.Dimension.Columns;
 
+                int startRow = 1;
+                for (int row = 1; row <= rowCount; row++)
+                {
+                    bool isEmptyRow = true;
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        if (worksheet.Cells[row, col].Value != null)
+                        {
+                            isEmptyRow = false;
+                            break;
+                        }
+                    }
+                    if (!isEmptyRow)
+                    {
+                        startRow = row;
+                        break;
+                    }
+                }
+
+                int startCol = 1;
                 for (int col = 1; col <= colCount; col++)
                 {
-                    string columnName = worksheet.Cells[1, col].Value?.ToString();
+                    bool isEmptyColumn = true;
+                    for (int row = startRow; row <= rowCount; row++)
+                    {
+                        if (worksheet.Cells[row, col].Value != null)
+                        {
+                            isEmptyColumn = false;
+                            break;
+                        }
+                    }
+                    if (!isEmptyColumn)
+                    {
+                        startCol = col;
+                        break;
+                    }
+                }
+
+                for (int col = startCol; col <= colCount; col++)
+                {
+                    string columnName = worksheet.Cells[startRow, col].Value?.ToString();
                     if (!string.IsNullOrEmpty(columnName))
                         dt.Columns.Add(columnName);
                 }
 
-                for (int row = 2; row <= rowCount; row++)
+                for (int row = startRow + 1; row <= rowCount; row++)
                 {
                     DataRow dataRow = dt.NewRow();
-                    for (int col = 1; col <= colCount; col++)
+                    for (int col = startCol; col <= colCount; col++)
                     {
-                        dataRow[col - 1] = worksheet.Cells[row, col].Value?.ToString();
+                        dataRow[col - startCol] = worksheet.Cells[row, col].Value?.ToString();
                     }
                     dt.Rows.Add(dataRow);
                 }
@@ -126,17 +164,15 @@ namespace FileHandler.Controllers
             foreach (DataRow row in dt.Rows)
             {
                 string customerCode = row["Customer Code"].ToString();
-
-                if (customerCodes.Contains(customerCode))
+                if(!string.IsNullOrEmpty(customerCode))
                 {
-                    duplicateCodes.Add(customerCode);
+                    if (customerCodes.Contains(customerCode))
+                        duplicateCodes.Add(customerCode);
+                    else
+                        customerCodes.Add(customerCode);
                 }
-                else
-                {
-                    customerCodes.Add(customerCode);
-                }
+                
             }
-
             return duplicateCodes;
         }
 

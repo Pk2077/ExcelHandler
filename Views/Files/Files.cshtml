@@ -3,7 +3,7 @@
 }
 
 
-<div id="Upload" style="display:block;">
+<div id="Upload" style="display:none;">
     <h2>Files</h2>
 
     <div class="row mb-4">
@@ -23,13 +23,22 @@
         </div>
     </div>
 </div>
-<div id="MyList" style="display:none;">
+<div id="MyList" style="display:block;">
 
 </div>
 
 
 @section scripts{
     <script>
+
+        $(document).ready(function () {
+            List();
+        });
+
+        $(document).on("click", "#UploadBtn", function () {
+            $('#MyList').hide();
+            $('#Upload').show();
+        });
 
         $(document).on("click", "#btnUpload", function () {
             var files = $("#importFile").get(0).files;
@@ -51,15 +60,20 @@
                         toasty.show();
                     } else {
                         showToast("Data Stored Successfully", 'success');
-                        $('#MyList').html(data);
-                        $('#Upload').hide();
-                        $('#MyList').show();
+                        $('#importFile').val('');
+                        setTimeout(function () {
+                            $('.toast').toast('hide');
+                        }, 1000);
                     }
                 },
                 error: function () {
-                    showToast('Failed To Import', 'warning')
+                    showToast('Failed To Upload', 'warning')
                 }
             });
+        });
+
+        $(document).on('click', '#HeaderChkBox', function () {
+            $('.selectCustomer').prop('checked', this.checked);
         });
 
         function List() {
@@ -81,6 +95,7 @@
 
         function Clear() {
             $('#importFile').val('');
+            List();
         }
 
         function deleteSelected() {
