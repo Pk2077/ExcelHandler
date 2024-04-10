@@ -4,11 +4,11 @@ using System.Web.Mvc;
 using System.IO;
 using FileHandler.Extensions;
 using OfficeOpenXml;
-using FileHandler.Models;
 using System.Collections.Generic;
-using System.Net.Http;
 using System;
 using System.Linq;
+using OfficeOpenXml.Style;
+using System.Drawing;
 
 namespace FileHandler.Controllers
 {
@@ -49,6 +49,77 @@ namespace FileHandler.Controllers
                 return List();
             }
 
+        }
+        [HttpPost]
+        public ActionResult ExportToExcel(List<List<Dictionary<string, object>>> tableData)
+        {
+            // Create Excel package and worksheet
+            ExcelPackage excel = new ExcelPackage();
+            var workSheet = excel.Workbook.Worksheets.Add("Sheet1");
+
+            // Set headers
+            string[] headers = { "Id", "Name", "Code", "Address 1", "Address 2", "City", "State", "Pin", "Mobile No" };
+            for (int col = 0; col < headers.Length; col++)
+            {
+                workSheet.Cells[1, col + 1].Value = headers[col];
+            }
+
+            // Populate data and apply styles
+            for (int row = 0; row < tableData.Count; row++)
+            {
+                for (int col = 0; col < tableData[row].Count; col++)
+                {
+                    var cellData = tableData[row][col];
+                    if (cellData != null && cellData.ContainsKey("value"))
+                    {
+                        workSheet.Cells[row + 2, col + 1].Value = cellData["value"];
+
+                        if (cellData.ContainsKey("backgroundColor") && cellData["backgroundColor"] != null)
+                        {
+                            string colorValue = cellData["backgroundColor"].ToString();
+                            Color color = ParseColor(colorValue);
+                            if (color != null)
+                            {
+                                workSheet.Cells[row + 2, col + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                workSheet.Cells[row + 2, col + 1].Style.Fill.BackgroundColor.SetColor(color);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Prepare response
+            byte[] fileContents = excel.GetAsByteArray();
+            string fileName = "table_data.xlsx";
+
+            // Return Excel file as downloadable response
+            return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        // Helper method to parse color string to Color object
+        private Color ParseColor(string colorValue)
+        {
+            try
+            {
+                // Check if colorValue is a named color (e.g., "Red", "Blue", etc.)
+                Color namedColor = Color.FromName(colorValue);
+                if (namedColor.IsKnownColor)
+                {
+                    return namedColor;
+                }
+
+                // Try parsing as a hexadecimal color (e.g., "#RRGGBB" format)
+                if (colorValue.StartsWith("#") && colorValue.Length == 7)
+                {
+                    return ColorTranslator.FromHtml(colorValue);
+                }
+
+                return Color.FromName("white"); // Invalid color format
+            }
+            catch
+            {
+                return Color.FromName("white"); // Error parsing color
+            }
         }
 
         [HttpPost]

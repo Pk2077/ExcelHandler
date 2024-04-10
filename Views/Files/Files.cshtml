@@ -2,7 +2,12 @@
     ViewBag.Title = "Files";
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+<style>
+    #color {
+        transition-property: background-color;
+        transition-duration: 3s;
+    }
+</style>
 
 <div id="Upload" style="display:none;">
     <h2>Files</h2>
@@ -12,34 +17,90 @@
             <label class="form-label">Select an Excel File  :</label>
         </div>
         <div class="col-md-4">
-            <label class="upload-icon" for="importFile">
+            <label class="upload-icon" for="importFile" id="color">
                 <i class="fas fa-upload"></i>
                 Upload an Excel File
+
             </label>
             <input style="display: none;" class="form-control" type="file" name="importFile" id="importFile" />
         </div>
 
     </div>
+    <div class="row mb-4">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <label id="file-name" class="form-label"></label>
+        </div>
+    </div>
     @*<div class="row mb-4">
-        <div class="col-md-2">
-            <button class="btn btn-primary" id="btnUpload" type="button">Upload</button>
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-outline-primary" id="btnCancel" type="button" onclick="Clear()">Cancel</button>
-        </div>
-    </div>*@
+            <div class="col-md-2">
+                <button class="btn btn-primary" id="btnUpload" type="button">Upload</button>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-primary" id="btnCancel" type="button" onclick="Clear()">Cancel</button>
+            </div>
+        </div>*@
 </div>
 <div id="MyList" style="display:block;">
 
 </div>
 
+<input type="hidden" name="GridHtml" />
+<input type="submit" id="btnSubmit" value="Export" />
 
 @section scripts{
+    <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script>
 
         $(document).ready(function () {
             $("#Delete_Lay").show();
             List();
+            $("#btnSubmit").click(function () {
+                var wb = XLSX.utils.book_new();
+                var ws = XLSX.utils.table_to_sheet(document.getElementById('employees'));
+
+                var range = XLSX.utils.decode_range(ws['!ref']);
+                for (var R = range.s.r; R <= range.e.r; ++R) {
+                    for (var C = range.s.c; C <= range.e.c; ++C) {
+                        var cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                        var td = document.getElementById(cellAddress);
+                        if (td && td.style.backgroundColor) {
+                            XLSX.utils.sheet_set_range_style(ws, cellAddress, { fill: { fgColor: { rgb: td.style.backgroundColor } } });
+                        }
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+                XLSX.writeFile(wb, 'table_data.xlsx');
+            });
+        });
+
+            function showToast(message, type) {
+                var toast = $('<div class="toast align-items-center text-white bg-' + type + ' border-0" role="alert" aria-live="assertive" aria-atomic="true">\
+                    <div class="d-flex">\
+                        <div class="toast-body">' + message + '</div>\
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>\
+                    </div>\
+                </div>');
+
+                $('.toast-container').append(toast);
+                var toastElement = toast[0];
+                var toastInstance = new bootstrap.Toast(toastElement);
+                toastInstance.show();
+            }
+
+        $(document).on("click", "#color", function () {
+            var self = this;
+            self.style.backgroundColor = '#45cdae';
+            setTimeout(function () {
+                self.style.backgroundColor = '#0179b6';
+            }, 3000);
+        });
+
+        $('#importFile').on('change', function () {
+            var fileName = $(this).val().split('\\').pop();
+            $('#file-name').text(fileName);
         });
 
         $(document).on("click", "#UploadBtn", function () {
@@ -167,7 +228,9 @@
             $("#btnUpload").hide();
             $("#UploadBtn_Lay").show();
             $("#Delete_Lay").show();
-         });
+        });
+
+
 
     </script>
 }
